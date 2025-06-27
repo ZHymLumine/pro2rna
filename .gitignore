@@ -1,0 +1,16 @@
+.DS_Store
+
+results/
+esm/
+CodonBERT/
+tests/
+ncbi_dataset/
+
+__pycache__/
+*tokenizer/
+test_*
+*.egg-info/
+*.csv
+*.pt
+wandb/
+data/
