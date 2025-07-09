@@ -526,12 +526,24 @@ class RevProtein(nn.Module):
         checkpoint = torch.load(config.decoder_path, map_location=self.device)
         gptconf = GPTConfig(**checkpoint['model_args'])
         model = GPT(gptconf)
+        print(f"gptconf: {gptconf}")
+        print(f"model: {model}")
         state_dict = checkpoint['model']
         unwanted_prefix = '_orig_mod.'
         for k,v in list(state_dict.items()):
             if k.startswith(unwanted_prefix):
                 state_dict[k[len(unwanted_prefix):]] = state_dict.pop(k)
-        model.load_state_dict(state_dict)
+        
+        # 过滤掉模型中不存在的键
+        model_keys = set(model.state_dict().keys())
+        filtered_state_dict = {}
+        for k, v in state_dict.items():
+            if k in model_keys:
+                filtered_state_dict[k] = v
+            else:
+                print(f"忽略不匹配的键: {k}")
+        
+        model.load_state_dict(filtered_state_dict, strict=False)
         
         return model
     
