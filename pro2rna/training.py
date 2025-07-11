@@ -75,13 +75,14 @@ class ModelArguments:
 
 
 class RevProteinTrainer(Trainer):
-    # def compute_loss(self, model, inputs, return_outputs=False):
-    #     labels = inputs.pop('labels')
-    #     outputs = model(labels=labels, **inputs)
-    #     logits = outputs.get('logits')
-    #     loss = outputs.get('loss')
-
-    #     return (loss, {'outputs':outputs}) if return_outputs else loss
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+        """
+        确保loss被正确提取，兼容新版本Transformers
+        """
+        labels = inputs.pop('labels')
+        outputs = model(labels=labels, **inputs)
+        loss = outputs.get('loss')
+        return (loss, outputs) if return_outputs else loss
 
     def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
         output_dir = output_dir if output_dir is not None else self.args.output_dir
@@ -89,18 +90,6 @@ class RevProteinTrainer(Trainer):
         self.model.save_model_weights(os.path.join(output_dir, "pytorch_model.bin"))
 
 
-def compute_metrics(eval_pred: tuple[np.ndarray, np.ndarray]):
-    predictions, labels = eval_pred
-    logits = predictions.get('logits')
-    predicted_classes = np.argmax(logits, axis=-1)
-    # mask = labels != model.padding_idx
-
-    # correct_predictions = (predicted_classes == labels)
-    # total_correct_predictions = correct_predictions.sum()
-    # total_predictions = mask.sum()
-    # accuracy = total_correct_predictions / total_predictions
-    accuracy = np.mean(predicted_classes == labels)
-    return {'accuracy': accuracy}
 
 
 if __name__ == "__main__":
@@ -134,7 +123,6 @@ if __name__ == "__main__":
         train_dataset=train_dataset,           
         eval_dataset=valid_dataset,      
         data_collator=custom_collate_fn,
-        compute_metrics=None,
     )
 
     if list(pathlib.Path(training_args.output_dir).glob(f"{PREFIX_CHECKPOINT_DIR}-*")):

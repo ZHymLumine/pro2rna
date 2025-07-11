@@ -13,9 +13,9 @@ torchrun --nnodes 1 --nproc_per_node ${num_gpus}  pro2rna/training.py \
     --num_train_epochs 20 \
     --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 8 \
-    --evaluation_strategy "epoch" \
+    --eval_strategy "epoch" \
     --gradient_accumulation_steps 8 \
-    --save_strategy "steps" \
+    --save_strategy "epoch" \
     --save_steps 100 \
     --save_total_limit 1 \
     --learning_rate 6e-4 \
@@ -24,6 +24,11 @@ torchrun --nnodes 1 --nproc_per_node ${num_gpus}  pro2rna/training.py \
     --dataloader_num_workers 6 \
     --logging_steps 1 \
     --report_to wandb \
+    --run_name "esm2_650M_scibert_mRNAGPT_with_eval" \
+    --load_best_model_at_end True \
+    --metric_for_best_model "eval_loss" \
+    --greater_is_better False \
+    --logging_first_step True \
     --decoder_type "RNAdecoder" \
     --RNA_config_path /home/yzhang/research/pro2rna/pro2rna/mRNAGPT/mrnagpt_config.json \
     --decoder_path /home/yzhang/research/pro2rna/pro2rna/mRNAGPT/ckpt_563000.pt \
