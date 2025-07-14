@@ -14,6 +14,7 @@ import numpy as np
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from tqdm import tqdm
 
 from pro2rna.model.model import RevProtein
 from pro2rna.calm.alphabet import Alphabet
@@ -179,7 +180,7 @@ def generate_mrna_sequences(model, protein_seq: str, species_prompt: str,
     
     generated_sequences = []
     
-    for _ in range(num_samples):
+    for sample_idx in tqdm(range(num_samples), desc="Generating samples", leave=False):
         # Create dummy codon labels (will be overwritten during generation)
         dummy_labels = torch.zeros((1, max_length), dtype=torch.long, device=device)
         dummy_labels.fill_(alphabet.padding_idx)
@@ -213,7 +214,7 @@ def generate_mrna_sequences(model, protein_seq: str, species_prompt: str,
         # Generate sequence step by step
         generated_ids = [alphabet.cls_idx]
         
-        for step in range(1, max_length):
+        for step in tqdm(range(1, max_length), desc=f"Generating sequence {sample_idx+1}", leave=False):
             # Create current labels tensor
             current_labels = torch.zeros((1, max_length), dtype=torch.long, device=device)
             current_labels.fill_(alphabet.padding_idx)
@@ -294,11 +295,11 @@ def main():
     # Generate sequences for each protein-species combination
     results = []
     
-    for protein_id, protein_seq in proteins.items():
+    for protein_id, protein_seq in tqdm(proteins.items(), desc="Processing proteins"):
         print(f"\nProcessing protein: {protein_id}")
         print(f"Protein sequence length: {len(protein_seq)}")
         
-        for idx, species_row in species_df.iterrows():
+        for idx, species_row in tqdm(species_df.iterrows(), desc=f"Generating for {protein_id}"):
             species_name = species_row.get('organism_name', species_row.get('scientific_name', f'species_{idx}'))
             print(f"  Generating for species: {species_name}")
             
