@@ -104,9 +104,9 @@ if __name__ == "__main__":
         return_remaining_strings=True
     )
     
-    print(f"training_args: {training_args}")
+    # print(f"training_args: {training_args}")
     print(f"model_args: {model_args}")
-    print(f"data_args: {data_args}")
+    # print(f"data_args: {data_args}")
     print(f'seed: {training_args.seed}')
     set_seed(training_args.seed)
 

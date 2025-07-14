@@ -12,10 +12,9 @@ MASTER_PORT=12345
 GPU_PER_NODE=1
 
 torchrun --nnodes=$NUM_NODES --nproc_per_node=$GPU_PER_NODE --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \
-    ../protein2rna/train_t5.py \
-    --train_data_path /raid_elmo/home/lr/zym/protein2rna/ncbi_dataset/data/train_flat.json \
-    --valid_data_path /raid_elmo/home/lr/zym/protein2rna/ncbi_dataset/data/valid_flat.json \
-    --output_dir /raid_elmo/home/lr/zym/protein2rna/checkpoints/codont5_2_tokenizer \
+    pro2rna/train_t5.py \
+    --dataset_path /home/yzhang/research/pro2rna/data/build \
+    --output_dir /home/yzhang/research/pro2rna/checkpoints/codont5_new_format \
     --model_name "t5-base" \
     --num_train_epochs 20 \
     --batch_size 8 \
@@ -29,4 +28,5 @@ torchrun --nnodes=$NUM_NODES --nproc_per_node=$GPU_PER_NODE --node_rank=$NODE_RA
     --warmup_steps 1000 \
     --logging_steps 100 \
     --report_to wandb \
-    --run_name "CodonT5"
+    --run_name "CodonT5_NewFormat" \
+    --max_length 512

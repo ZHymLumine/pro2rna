@@ -7,7 +7,7 @@ export CUDA_VISIBLE_DEVICES=6
 num_gpus=1
 torchrun --nnodes 1 --nproc_per_node ${num_gpus}  pro2rna/training.py \
     --dataset_path /home/yzhang/research/pro2rna/data/build \
-    --output_dir /home/yzhang/research/pro2rna/checkpoints/esm2_35M_scibert_mRNAGPT \
+    --output_dir /home/yzhang/research/pro2rna/checkpoints/esm2_650M_scibert_mRNAGPT \
     --esm_name_or_path "esm2_t33_650M_UR50D" \
     --species_model "scibert" \
     --num_train_epochs 20 \
@@ -16,7 +16,7 @@ torchrun --nnodes 1 --nproc_per_node ${num_gpus}  pro2rna/training.py \
     --eval_strategy "epoch" \
     --gradient_accumulation_steps 8 \
     --save_strategy "epoch" \
-    --save_steps 100 \
+    --save_steps 20 \
     --save_total_limit 1 \
     --learning_rate 6e-4 \
     --weight_decay 0. \
