@@ -1,0 +1,8 @@
+{
+  "total_proteins": 1,
+  "total_species": 1,
+  "total_generated_sequences": 50,
+  "average_mrna_length": 714.0,
+  "min_mrna_length": 714,
+  "max_mrna_length": 714
+}

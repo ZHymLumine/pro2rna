@@ -1,0 +1,85 @@
+{
+  "builder_name": "generator",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "generator",
+  "dataset_size": 1500826,
+  "description": "",
+  "download_checksums": {},
+  "download_size": 0,
+  "features": {
+    "gcf_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "protein_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "protein_sequence": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "cds_sequence": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "mrna_sequence": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "superkingdom": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "kingdom": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "phylum": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "class": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "order": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "family": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "genus": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "species": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "organism_name": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 1500826,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 1500826,
+      "num_examples": 669,
+      "dataset_name": "generator"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

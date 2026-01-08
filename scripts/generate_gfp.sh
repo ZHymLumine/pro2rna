@@ -6,7 +6,7 @@ export CUDA_VISIBLE_DEVICES=4
 cd /home/yzhang/research/pro2rna
 
 python scripts/generate_gfp.py \
-    --model_path /home/yzhang/research/pro2rna/checkpoints/esm2_650M_scibert_mRNAGPT/checkpoint-343/pytorch_model.bin \
+    --model_path /home/yzhang/research/pro2rna/checkpoints/esm2_650M_scibert_mRNAGPT/checkpoint-539/pytorch_model.bin \
     --esm_name_or_path "esm2_t33_650M_UR50D" \
     --species_model "scibert" \
     --decoder_type "RNAdecoder" \

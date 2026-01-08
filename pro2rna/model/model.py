@@ -110,11 +110,18 @@ class RevProtein(nn.Module):
             
             self.RNA_config = RNA_config
             self.RNA_embedding_dim = self.RNA_config['n_embd']
-            self.RNAdecoder = self.init_RNAdecoder(config, self.RNA_config)
+            self.RNAdecoder = self.init_RNAdecoder(config)
             self._apply_decoder_lora()
             
+            # Projector for when species model is used (concat protein + species)
             self.RNA_projector = build_patch_mlp_projector(
                 input_hidden_size=self.prot_embed_dim + self.embedding_size,
+                lm_hidden_size=self.RNA_embedding_dim,
+                num_layers=self.num_projector_layers,
+            )
+            # Projector for when species model is not used (only protein)
+            self.RNA_projector_no_species = build_patch_mlp_projector(
+                input_hidden_size=self.prot_embed_dim,
                 lm_hidden_size=self.RNA_embedding_dim,
                 num_layers=self.num_projector_layers,
             )
@@ -358,18 +365,12 @@ class RevProtein(nn.Module):
         prompts = kwargs['prompts']
         codon_labels = labels.to(self.device)
         
-        # 1) extrcat protein embedding(per residue) and whole protein sequence embedding
+        # 1) extract protein embedding(per residue) and whole protein sequence embedding
         batch_protein_tokens, protein_embeddings = self.encode_protein_sequence(batch_protein_sequence)
-        # protein_embeddings = self.projector(protein_embeddings)
 
-        # 2) fuse protein embedding and species embedding
+        # 2) fuse protein embedding and species embedding (if species model exists)
         if self.species_model != None:
             species_embeddings = self.extract_species_embedding(prompts)
-            # protein_sequence_representations = protein_sequence_representations + species_embeddings
-
-            # species_embeddings = species_embeddings.unsqueeze(1)    # (B, 1, D)
-            # protein_embeddings = protein_embeddings + species_embeddings
-
             # concat feature
             species_embeddings = species_embeddings.unsqueeze(1).expand(-1, protein_embeddings.size(1), -1)   # (B, L, D)
             combined_emb = torch.cat((protein_embeddings, species_embeddings), dim=2)
@@ -377,14 +378,13 @@ class RevProtein(nn.Module):
                 protein_embeddings = self.RNA_projector(combined_emb)
             else: 
                 protein_embeddings = self.prot_species_to_rna(combined_emb) # (B, L, D)
-            # (B, L, D) -> (B, L+1, D)
-            
-            # species_embeddings = species_embeddings.unsqueeze(1)
-            # protein_embeddings = self.projector(protein_embeddings)
-            # combined_emb = torch.cat((species_embeddings, protein_embeddings), dim=1)
-            # protein_embeddings = self.prot_species_projector(combined_emb) # (B, L+1, D)
-            # print(f"protein_embeddings: {protein_embeddings.shape}")
-        
+        else:
+            # No species model: process protein embeddings only
+            if self.decoder_type == "RNAdecoder":
+                protein_embeddings = self.RNA_projector_no_species(protein_embeddings)
+            else:
+                # For MLP decoder, project from prot_embed_dim to embedding_size
+                protein_embeddings = self.projector(protein_embeddings) # (B, L, embedding_size)
 
 
         # 3) output the logtis
@@ -522,7 +522,7 @@ class RevProtein(nn.Module):
         if param_info['decoder_lora_params'] > 0:
             print(f"  Decoder LoRA参数: {param_info['decoder_lora_params']:,}")
 
-    def init_RNAdecoder(self, config, RNA_config):
+    def init_RNAdecoder(self, config):
         checkpoint = torch.load(config.decoder_path, map_location=self.device)
         gptconf = GPTConfig(**checkpoint['model_args'])
         model = GPT(gptconf)

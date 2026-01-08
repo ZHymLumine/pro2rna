@@ -76,9 +76,6 @@ class ModelArguments:
 
 class RevProteinTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
-        """
-        确保loss被正确提取，兼容新版本Transformers
-        """
         labels = inputs.pop('labels')
         outputs = model(labels=labels, **inputs)
         loss = outputs.get('loss')
