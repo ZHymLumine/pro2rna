@@ -1,6 +1,7 @@
 .DS_Store
 
 results/
+checkpoints/
 esm/
 CodonBERT/
 tests/

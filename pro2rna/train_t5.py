@@ -91,6 +91,9 @@ def load_and_tokenize_data_from_dataset(dataset, input_tokenizer, label_tokenize
             padding="max_length",
             max_length=max_length
         )["input_ids"]
+        # Set padding tokens to -100 (ignored in loss calculation)
+        pad_token_id = label_tokenizer.pad_token_id
+        labels = [[-100 if token_id == pad_token_id else token_id for token_id in label] for label in labels]
         return {"labels": labels}
 
     input_dataset = Dataset.from_list(input_texts)
@@ -148,6 +151,9 @@ def load_and_tokenize_data_from_jsonl(file_path, input_tokenizer, label_tokenize
             padding="max_length",
             max_length=max_length
         )["input_ids"]
+        # Set padding tokens to -100 (ignored in loss calculation)
+        pad_token_id = label_tokenizer.pad_token_id
+        labels = [[-100 if token_id == pad_token_id else token_id for token_id in label] for label in labels]
         return {"labels": labels}
 
     input_dataset = Dataset.from_list(input_texts)
@@ -190,6 +196,7 @@ def main():
     parser.add_argument("--prediction_loss_only", type=bool, default=True, help="Whether to compute only prediction loss during evaluation.")
     parser.add_argument("--report_to", type=str, default="wandb", help="Reporting tool (e.g., 'wandb', 'tensorboard').")
     parser.add_argument("--run_name", type=str, default="CodonT5", help="specify wandb run name.")
+    parser.add_argument("--max_grad_norm", type=float, default=1.0, help="Maximum gradient norm for gradient clipping.")
 
     args = parser.parse_args()
 
@@ -212,11 +219,23 @@ def main():
     # 初始化模型
     model = T5ForConditionalGeneration.from_pretrained(model_args.model_name).to(device)
     model.resize_token_embeddings(len(input_tokenizer))
-    model.lm_head = torch.nn.Linear(
+    
+    # Initialize new lm_head with proper initialization
+    new_lm_head = torch.nn.Linear(
         model.config.d_model,
         len(label_tokenizer),
         bias=False
-    ).to(device) 
+    ).to(device)
+    
+    # Copy weights from old lm_head if dimensions match (for shared embeddings)
+    if model.lm_head.weight.shape[0] == len(input_tokenizer):
+        # Initialize with small random values if vocab sizes differ significantly
+        torch.nn.init.normal_(new_lm_head.weight, mean=0.0, std=0.02)
+    else:
+        # Use Xavier uniform initialization
+        torch.nn.init.xavier_uniform_(new_lm_head.weight)
+    
+    model.lm_head = new_lm_head 
     
     # Calculate model parameters
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -286,11 +305,12 @@ def main():
         save_total_limit=args.save_total_limit,
         logging_dir=args.logging_dir,
         logging_steps=args.logging_steps,
-        evaluation_strategy=args.eval_strategy,
+        eval_strategy=args.eval_strategy,
         run_name=args.run_name,
         save_safetensors=False,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         report_to=args.report_to,
+        max_grad_norm=args.max_grad_norm,
     )
 
     # 检查是否有checkpoint可以恢复
