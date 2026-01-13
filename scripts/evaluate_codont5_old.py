@@ -181,4 +181,4 @@ if __name__ == "__main__":
 
     evaluate(args)
 
-# CUDA_VISIBLE_DEVICES=1 python evaluate_codont5_forward.py --test_data_path /raid_elmo/home/lr/zym/protein2rna/ncbi_dataset/data/test_flat.json --model_name /raid_elmo/home/lr/zym/protein2rna/checkpoints/codont5/checkpoint-1413000 --batch_size 128
+# CUDA_VISIBLE_DEVICES=1 python evaluate_codont5_forward.py --test_data_path /raid_elmo/home/lr/zym/protein2rna/ncbi_dataset/data/test_flat.json --model_name /home/yzhang/research/pro2rna/checkpoints/codont5_new_format/checkpoint-500 --batch_size 128
