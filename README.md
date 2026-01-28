@@ -24,8 +24,8 @@ Pro2RNA is a cutting-edge multimodal framework that generates organism-specific 
    - Leverages ESM-2's understanding of protein structure and function
    - LoRA adaptation for task-specific tuning
 
-3. **CrossAttentionFusion**
-   - Fuses taxonomic and protein embeddings via cross-attention
+3. **Fusion**
+   - Fuses taxonomic and protein embeddings
    - Enables conditional dependencies for organism-specific generation
    - Output: Rich multimodal context embeddings
 
@@ -40,7 +40,7 @@ Pro2RNA is a cutting-edge multimodal framework that generates organism-specific 
 ```
 Taxonomy Prompt → SciBERT+LoRA → Taxonomy Embeddings
                                       ↓
-                              CrossAttentionFusion → Fused Context
+                                  Fused Context
                                       ↑
 Protein Sequence → ESM-2+LoRA → Protein Embeddings
                                       ↓
